@@ -60,7 +60,14 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
 
 - Several source clips: join them first (same filter pattern, or the concat demuxer if they share a codec), then
   treat the result as `main.mp4`.
-- This is a full re-encode: minutes of every core for a 10-minute 1080p video. Run it where `render_notes` say.
+- This is a full re-encode: minutes of every core for a 10-minute 1080p video. **Run it on Modal**, not locally and
+  not on a home server: put the arguments after the inputs (from `-filter_complex` to `+faststart`) one per line in
+  `render.args`, then
+  `$MODAL run "${CLAUDE_PLUGIN_ROOT}/scripts/ffmpeg_modal.py" --inputs intro.mp4,main.mp4,outro.mp4 --args-file render.args --out out.mp4`
+  (`modal_command` and `run_notes` from preferences say where Modal runs). Join several clips in the same graph
+  (`concat` filter) rather than as a separate pass. Delete the job's folder in volume `ffmpeg-render-work` afterwards.
+- xfade needs both inputs on the same timebase: put `fps=30,settb=1/30` on every video branch (including after a
+  `concat`), or ffmpeg fails with "First input link main timebase (1/30) do not match".
 - Verify: output duration is about `DI + DV + DO - 2*F`, and check frames at `DI-F/2` (mid-fade), the middle and
   the end.
 
