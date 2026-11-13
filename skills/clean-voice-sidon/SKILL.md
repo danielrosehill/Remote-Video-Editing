@@ -26,7 +26,8 @@ before adding them.
 
 ## Preferences
 
-Read `${CLAUDE_USER_DATA:-${XDG_DATA_HOME:-$HOME/.local/share}/claude-plugins}/remote-video-editing/preferences.json` if it exists:
+Read `remote-video-editing/preferences.json` under the first data root that exists: `$CLAUDE_USER_DATA`, then
+`~/.claude-user-data`, then `${XDG_DATA_HOME:-~/.local/share}/claude-plugins`. Keys:
 
 | Key | Default | Meaning |
 |-----|---------|---------|

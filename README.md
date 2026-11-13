@@ -22,7 +22,8 @@ use model-based tools.
 
 ## Configuration (optional)
 
-`${CLAUDE_USER_DATA:-${XDG_DATA_HOME:-$HOME/.local/share}/claude-plugins}/remote-video-editing/preferences.json`:
+`remote-video-editing/preferences.json` under the first data root that exists: `$CLAUDE_USER_DATA`,
+`~/.claude-user-data`, or `${XDG_DATA_HOME:-~/.local/share}/claude-plugins`:
 
 ```json
 {
