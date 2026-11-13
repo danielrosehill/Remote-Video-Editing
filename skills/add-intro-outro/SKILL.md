@@ -1,6 +1,6 @@
 ---
 name: add-intro-outro
-description: Put the user's brand intro and outro stings on a finished video, choosing the 16:9 or 9:16 pair to match the video's orientation, with a short fade from the intro into the video and from the video into the outro. Also builds a 16:9 cut of a vertical video with a blurred background. Use on "add the intro", "put the intro and outro on", "brand the video", "make a landscape version", "final render for YouTube".
+description: Put the user's brand intro and outro stings on a finished video (with optional vid.stab stabilisation for handheld phone footage), choosing the 16:9 or 9:16 pair to match the video's orientation, with a short fade from the intro into the video and from the video into the outro. Also builds a 16:9 cut of a vertical video with a blurred background. Use on "add the intro", "put the intro and outro on", "brand the video", "make a landscape version", "final render for YouTube".
 ---
 
 # Add the intro and outro
@@ -70,6 +70,24 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
   `concat`), or ffmpeg fails with "First input link main timebase (1/30) do not match".
 - Verify: output duration is about `DI + DV + DO - 2*F`, and check frames at `DI-F/2` (mid-fade), the middle and
   the end.
+
+## Handheld footage: stabilise in the same render
+
+Phone videos shot handheld benefit from light stabilisation (Daniel, 2026-11-13, after the first Hebrish weekend
+update went out without it). Use ffmpeg's vid.stab (`libvidstab`; Debian's ffmpeg, which the Modal image installs,
+has it; check with `ffmpeg -filters | grep vidstab`). Two passes, both on Modal:
+
+1. **Detect** (fast, analysis only, writes a transforms file), per source clip:
+   `ffmpeg -i main.mp4 -vf vidstabdetect=shakiness=5:accuracy=15:result=main.trf -f null -`
+   Run it as its own `ffmpeg_modal.py` job (args `-vf` / `vidstabdetect=...:result=/work/<job>/main.trf` / `-f` /
+   `null`, output `-`), or add a detect step to the script. The `.trf` must sit beside the input in the volume.
+2. **Transform** inside the main render, first thing on that clip's video branch, before grade and scale:
+   `vidstabtransform=input=main.trf:smoothing=20:zoom=2:optzoom=0,unsharp=5:5:0.4`
+   `smoothing` around 15-30 (frames) keeps natural motion; a fixed `zoom=2` (percent) hides the moving borders
+   without the pumping `optzoom=1` causes on a talking head. The light unsharp offsets the resampling softness.
+
+Test on an 8-second cut first and compare a still and a short clip with the user before the full render. If
+`libvidstab` is missing, `deshake` is a one-pass fallback (weaker). AI stabilisers are not needed for this.
 
 ## Making stings
 
