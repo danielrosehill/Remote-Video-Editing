@@ -8,6 +8,8 @@ use model-based tools.
 
 - `clean-voice-sidon`: clean up a video's voice track with the Sidon v0.1 speech-restoration model on a
   Modal GPU, then two-pass loudness-normalise and remux it without re-encoding the video. Tests on 30 s first.
+- `add-intro-outro`: put your intro and outro stings on a video (16:9 or 9:16 to match), with short fades; also a
+  16:9 blurred-background cut of a vertical video.
 - `find-script`: before writing a new job script, search your private script library for one to reuse or adapt.
 - `save-script`: after a job, save its script to the library with notes on what it was used for.
 - `complementary-plugins`: list and install the plugins that go with this one.

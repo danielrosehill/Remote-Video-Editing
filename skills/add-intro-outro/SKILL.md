@@ -1,0 +1,71 @@
+---
+name: add-intro-outro
+description: Put the user's brand intro and outro stings on a finished video, choosing the 16:9 or 9:16 pair to match the video's orientation, with a short fade from the intro into the video and from the video into the outro. Also builds a 16:9 cut of a vertical video with a blurred background. Use on "add the intro", "put the intro and outro on", "brand the video", "make a landscape version", "final render for YouTube".
+---
+
+# Add the intro and outro
+
+The stings are short MP4s with their own jingle, one pair per orientation, listed in preferences. This skill
+normalises everything to one format, joins intro, video and outro with short cross-fades (video and audio), and
+renders the result.
+
+## Preferences
+
+`remote-video-editing/preferences.json` (lookup order as in `clean-voice-sidon`):
+
+| Key | Meaning |
+|-----|---------|
+| `stings` | `{"intro_16x9": url, "outro_16x9": url, "intro_9x16": url, "outro_9x16": url}`; URLs or local paths |
+| `sting_fade_s` | Cross-fade length, default `0.5` |
+| `render_notes` | Where to run long encodes (e.g. a server rather than a laptop). Follow them. |
+
+If `stings` is not set, ask for the files. The plugin does not ship any brand assets.
+
+## Orientation
+
+Read the **displayed** orientation, not the coded size: phones store portrait video as 1920x1080 with a rotation
+tag. Check with
+`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:stream_side_data=rotation -of compact IN`.
+A rotation of 90 or -90 swaps width and height. ffmpeg applies the rotation automatically when it decodes.
+
+- Portrait (9:16) video: use `intro_9x16` / `outro_9x16`, canvas 1080x1920.
+- Landscape: use the 16:9 pair, canvas 1920x1080.
+- **16:9 cut of a portrait video** (for YouTube's main feed): canvas 1920x1080, the video scaled to 1080 high in the
+  centre, over a blurred, darkened, zoomed copy of itself; use the 16:9 stings. The `[v1]` chain below becomes:
+  ```
+  [1:v]fps=30,split[a][b];
+  [a]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,scale=480:270,boxblur=20:2,scale=1920:1080,eq=brightness=-0.06:saturation=0.9[bg];
+  [b]scale=-2:1080[fg];[bg][fg]overlay=(W-w)/2:0,setsar=1,format=yuv420p[v1]
+  ```
+  Test it on an 8-second cut (`-ss 60 -t 8`) and show a frame before rendering the whole thing.
+
+## Render
+
+`W:H` is the canvas, `F` the fade (0.5), `DI` the intro duration, `DV` the video duration (ffprobe `format=duration`).
+Offsets: first fade at `DI-F`; second at `DI+DV-2*F`.
+
+```bash
+ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
+ [0:v]fps=30,scale=W:H,setsar=1,format=yuv420p[v0];
+ [1:v]fps=30,scale=W:H:force_original_aspect_ratio=decrease,pad=W:H:(ow-iw)/2:(oh-ih)/2,setsar=1,format=yuv420p[v1];
+ [2:v]fps=30,scale=W:H,setsar=1,format=yuv420p[v2];
+ [0:a]aresample=48000,aformat=channel_layouts=stereo[a0];
+ [1:a]aresample=48000,aformat=channel_layouts=stereo[a1];
+ [2:a]aresample=48000,aformat=channel_layouts=stereo[a2];
+ [v0][v1]xfade=transition=fade:duration=F:offset=DI-F[v01];
+ [v01][v2]xfade=transition=fade:duration=F:offset=DI+DV-2*F[v];
+ [a0][a1]acrossfade=d=F[a01];[a01][a2]acrossfade=d=F[a]" \
+ -map "[v]" -map "[a]" -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart out.mp4
+```
+
+- Several source clips: join them first (same filter pattern, or the concat demuxer if they share a codec), then
+  treat the result as `main.mp4`.
+- This is a full re-encode: minutes of every core for a 10-minute 1080p video. Run it where `render_notes` say.
+- Verify: output duration is about `DI + DV + DO - 2*F`, and check frames at `DI-F/2` (mid-fade), the middle and
+  the end.
+
+## Making stings
+
+The stings in use were rendered from the brand SVGs with a small Pillow script plus a generated jingle. Find it
+with `find-script` (tags `logo`, `sting`, `intro`), and don't regenerate the logo with a video model: video models
+distort letterforms.
