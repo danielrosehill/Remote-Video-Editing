@@ -73,6 +73,11 @@ Work in a folder next to the source video. `IN=<video>`, `MODAL=<modal_command, 
 6. **Verify:** `ffprobe` the duration against the source (should match to within a frame), and cut a 30 s
    before/after pair at the same offset (`-vn -c:a copy`) for the user to compare.
 
+## Script library
+
+If the user has a script library (`find-script`, `save-script`), check it before changing the Modal job, and save
+any changed version afterwards.
+
 ## Cost and limits
 
 - GPU list in the script: L4, A10G, L40S (whichever Modal has free). Timeout 1 hour.

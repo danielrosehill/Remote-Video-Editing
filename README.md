@@ -8,6 +8,8 @@ use model-based tools.
 
 - `clean-voice-sidon`: clean up a video's voice track with the Sidon v0.1 speech-restoration model on a
   Modal GPU, then two-pass loudness-normalise and remux it without re-encoding the video. Tests on 30 s first.
+- `find-script`: before writing a new job script, search your private script library for one to reuse or adapt.
+- `save-script`: after a job, save its script to the library with notes on what it was used for.
 - `complementary-plugins`: list and install the plugins that go with this one.
 
 ## Complementary plugins
@@ -30,9 +32,14 @@ use model-based tools.
   "modal_command": "modal",
   "run_notes": "where and how to run Modal, if not on this machine",
   "loudness_lufs": -14,
-  "true_peak_db": -1.5
+  "true_peak_db": -1.5,
+  "scripts_repo": "owner/Cloud-Video-Editing-Scripts",
+  "scripts_repo_path": "~/repos/Cloud-Video-Editing-Scripts"
 }
 ```
+
+`scripts_repo` is a private GitHub repo used as a library of past job scripts (`index.json` catalogue plus
+`scripts/<slug>/` folders); `save-script` offers to create it if it is not set. Requires `gh` and `jq`.
 
 ## Installation
 
