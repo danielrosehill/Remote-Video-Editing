@@ -73,7 +73,7 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
 
 ## Handheld footage: stabilise in the same render
 
-Phone videos shot handheld benefit from light stabilisation (Daniel, 2026-11-13, after the first Hebrish weekend
+Phone videos shot handheld benefit from light stabilisation (the user, 2026-11-13, after the first Hebrish weekend
 update went out without it). Use ffmpeg's vid.stab (`libvidstab`; Debian's ffmpeg, which the Modal image installs,
 has it; check with `ffmpeg -filters | grep vidstab`). Two passes, both on Modal:
 

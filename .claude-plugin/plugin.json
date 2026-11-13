@@ -1,6 +1,6 @@
 {
   "name": "remote-video-editing",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Video editing and rendering on rented cloud GPUs (Modal): offload heavy jobs like AI voice cleanup from a local machine.",
   "author": {
     "name": "Daniel Rosehill",
