@@ -65,7 +65,7 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
   `render.args`, then
   `$MODAL run "${CLAUDE_PLUGIN_ROOT}/scripts/ffmpeg_modal.py" --inputs intro.mp4,main.mp4,outro.mp4 --args-file render.args --out out.mp4`
   (`modal_command` and `run_notes` from preferences say where Modal runs). Join several clips in the same graph
-  (`concat` filter) rather than as a separate pass. Delete the job's folder in volume `ffmpeg-render-work` afterwards.
+  (`concat` filter) rather than as a separate pass. Delete the job's folder in volume `video-editing-work` afterwards.
 - xfade needs both inputs on the same timebase: put `fps=30,settb=1/30` on every video branch (including after a
   `concat`), or ffmpeg fails with "First input link main timebase (1/30) do not match".
 - Verify: output duration is about `DI + DV + DO - 2*F`, and check frames at `DI-F/2` (mid-fade), the middle and

@@ -13,9 +13,9 @@ given to ffmpeg in the order listed as `-i` options. Cost: CPU containers are bi
 import pathlib
 import modal
 
-app = modal.App("ffmpeg-render")
+app = modal.App("video-editing")
 image = modal.Image.debian_slim(python_version="3.12").apt_install("ffmpeg")
-vol = modal.Volume.from_name("ffmpeg-render-work", create_if_missing=True)
+vol = modal.Volume.from_name("video-editing-work", create_if_missing=True)
 
 
 @app.function(image=image, cpu=16, memory=16384, timeout=3 * 3600, volumes={"/work": vol})
@@ -47,4 +47,4 @@ def main(inputs: str, args_file: str, out: str, job: str = ""):
     with open(out, "wb") as f:
         for chunk in vol.read_file(remote):
             f.write(chunk)
-    print(f"wrote {out}; inputs stay in volume ffmpeg-render-work/{job} (delete with: modal volume rm -r ffmpeg-render-work {job})")
+    print(f"wrote {out}; inputs stay in volume video-editing-work/{job} (delete with: modal volume rm -r video-editing-work {job})")
