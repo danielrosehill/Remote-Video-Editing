@@ -55,7 +55,7 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
  [v0][v1]xfade=transition=fade:duration=F:offset=DI-F[v01];
  [v01][v2]xfade=transition=fade:duration=F:offset=DI+DV-2*F[v];
  [a0][a1]acrossfade=d=F[a01];[a01][a2]acrossfade=d=F[a]" \
- -map "[v]" -map "[a]" -c:v libx264 -preset medium -crf 18 -c:a aac -b:a 192k -movflags +faststart out.mp4
+ -map "[v]" -map "[a]" -c:v libx264 -preset medium -crf 20 -maxrate 10M -bufsize 20M -c:a aac -b:a 192k -movflags +faststart out.mp4
 ```
 
 - Several source clips: join them first (same filter pattern, or the concat demuxer if they share a codec), then
@@ -68,6 +68,8 @@ ffmpeg -y -i intro.mp4 -i main.mp4 -i outro.mp4 -filter_complex "
   (`concat` filter) rather than as a separate pass. Delete the job's folder in volume `video-editing-work` afterwards.
 - xfade needs both inputs on the same timebase: put `fps=30,settb=1/30` on every video branch (including after a
   `concat`), or ffmpeg fails with "First input link main timebase (1/30) do not match".
+- Bitrate: keep the cap (`-crf 20 -maxrate 10M -bufsize 20M`). Plain CRF 18 on noisy phone footage came out at
+  24 Mbps, about 2 GB for 11 minutes (2026-11-13). YouTube re-encodes anyway and suggests 8-12 Mbps for 1080p uploads.
 - Verify: output duration is about `DI + DV + DO - 2*F`, and check frames at `DI-F/2` (mid-fade), the middle and
   the end.
 
